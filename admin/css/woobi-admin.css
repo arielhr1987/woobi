@@ -1,5 +1,29 @@
-.woobi-pivot {
-  border: 0;
-  color: red; }
+.woobi-pivot-container {
+  background-color: white; }
+  .woobi-pivot-container *, .woobi-pivot-container ::after, .woobi-pivot-container ::before {
+    box-sizing: border-box; }
+  .woobi-pivot-container .woobi-table-container {
+    padding: 0 !important; }
+  .woobi-pivot-container .woobi-table-bordered {
+    border: 1px solid #e2e4e7; }
+    .woobi-pivot-container .woobi-table-bordered th, .woobi-pivot-container .woobi-table-bordered td {
+      border: 1px solid #e2e4e7; }
+  .woobi-pivot-container .woobi-table {
+    width: 100%;
+    color: #212529;
+    background-color: transparent;
+    border-collapse: collapse; }
+    .woobi-pivot-container .woobi-table th, .woobi-pivot-container .woobi-table td {
+      padding: 7px 10px 6px;
+      vertical-align: top;
+      border-top: 1px solid #e2e4e7; }
+    .woobi-pivot-container .woobi-table tr:first-child th, .woobi-pivot-container .woobi-table tr:first-child td {
+      border-top: none; }
+    .woobi-pivot-container .woobi-table tr:last-child th, .woobi-pivot-container .woobi-table tr:last-child td {
+      border-bottom: none; }
+    .woobi-pivot-container .woobi-table tr td :first-child, .woobi-pivot-container .woobi-table tr tr :first-child {
+      border-left: none; }
+    .woobi-pivot-container .woobi-table tr td :last-child, .woobi-pivot-container .woobi-table tr tr :last-child {
+      border-right: none; }
 
 /*# sourceMappingURL=woobi-admin.css.map */

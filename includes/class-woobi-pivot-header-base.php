@@ -181,7 +181,7 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 
 		$html = '';
 		if ( $this->is_root() ) {
-			$html = '<table class="table table-nested">';
+			$html = '<table class="woobi-table">';
 		}
 		$max     = 3;
 		$colspan = $max - $this->level() + 1;

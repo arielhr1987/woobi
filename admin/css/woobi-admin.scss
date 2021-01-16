@@ -1,4 +1,68 @@
-.woobi-pivot{
-  border: 0;
-  color: red;
+$spacer: 1rem;
+$table-color: #212529;
+$table-bg: transparent;
+$table-cell-padding: 0.75rem;
+$table-border-width: 1px;
+$table-border-color: rgb(226, 228, 231);
+$table-cell-padding-sm: 0.75rem;
+
+.woobi-pivot-container {
+  background-color: white;
+
+  *, ::after, ::before {
+    box-sizing: border-box;
+  }
+
+  .woobi-table-container {
+    padding: 0 !important;
+  }
+
+  .woobi-table-bordered {
+    border: $table-border-width solid $table-border-color;
+
+    th, td {
+      border: $table-border-width solid $table-border-color;
+    }
+  }
+
+  .woobi-table {
+    width: 100%;
+    color: $table-color;
+    background-color: $table-bg; // Reset for nesting within parents with `background-color`.
+    border-collapse: collapse;
+
+    th, td {
+      //padding: $table-cell-padding;
+      padding: 7px 10px 6px;
+      vertical-align: top;
+      border-top: $table-border-width solid $table-border-color;
+    }
+
+    tr {
+      &:first-child {
+        th, td {
+          border-top: none;
+        }
+      }
+
+      &:last-child {
+        th, td {
+          border-bottom: none;
+        }
+      }
+
+      td, tr {
+        :first-child {
+          border-left: none;
+        }
+
+        :last-child {
+          border-right: none;
+        }
+      }
+    }
+
+  }
+
+
 }

@@ -157,7 +157,8 @@ class Woobi_Pivot{
 
 		?>
         <div class="woobi-pivot-container">
-            <table class="woobi-pivot wp-list-table widefat">
+<!--      wp-list-table widefat      -->
+            <table class="woobi-pivot woobi-table woobi-table-bordered">
                 <tbody>
                 <tr>
                     <td colspan="3">
@@ -185,8 +186,8 @@ class Woobi_Pivot{
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="1" class="woo-bi-left-axis-header">
-						<?php return $this->row_header->render(); ?>
+                    <td colspan="1" class="woo-bi-left-axis-header woobi-table-container">
+						<?php echo $this->row_header->render(); ?>
                     </td>
                     <td colspan="1" class="p-0">
                         <div class="woo-bi-data-container" style="overflow: hidden">
