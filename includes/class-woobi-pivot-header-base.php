@@ -91,7 +91,7 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 
 		if ( $child ) {
 			$pivot     = $this->get_pivot();
-			$dimension = $this->get_child_dimension();
+			$dimension = $this->child_dimension();
 
 			$child->set_pivot( $pivot );
 			$child->set_dimension( $dimension );
@@ -132,13 +132,53 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 	}
 
 	/**
-	 * Expand current node
+	 * Recursive method to traverse node hierarchy and generate sql WHERE clause
+	 * i.e. (`country` = 'USA' AND 'city` = 'Boston')
+	 * where country and city are dimensions
+	 *
+	 * @param Woobi_Pivot_Query_Builder $query
+	 *
+	 * @return Woobi_Pivot_Query_Builder
+	 * @since 1.0.0
+	 */
+	protected function where( $query ) {
+		if ( $this->is_root() ) {
+			return $query;
+		}
+		$this->get_parent()->where( $query );
+		$query->where( $this->dimension->get_column(), $this->get_value() );
+
+		return $query;
+	}
+
+	/**
+	 * Get the next dimension that will be assigned to this node children
+	 *
+	 * @return false|Woobi_Pivot_Dimension
+	 * @since 1.0.0
+	 */
+	public function child_dimension() {
+		$level = $this->level();
+
+		if ( $this instanceof Woobi_Pivot_Header_Row ) {
+			//its a row
+			$rows = $this->get_pivot()->get_rows();
+		} else {
+			//its a column
+			$rows = $this->get_pivot()->get_columns();
+		}
+
+		return isset( $rows[ $level ] ) ? $rows[ $level ] : false;
+	}
+
+	/**
+	 * Process current node recursively.
 	 *
 	 * @since 1.0.0
 	 */
-	public function expand() {
+	public function process() {
 
-		$child_dimension = $this->get_child_dimension();
+		$child_dimension = $this->child_dimension();
 		if ( ! $child_dimension ) {
 			/**
 			 * Nothing to expand
@@ -150,7 +190,7 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 		$query->distinct();
 		$query->select( $child_dimension->get_column() ); //TODO: include alias
 		$query->order_by( $child_dimension->get_column(), $child_dimension->get_sort() );
-		$query = $this->recursive_where( $query );
+		$query = $this->where( $query );
 		$sql   = $query->get_compiled_select( 'customer_product_dollarsales' );
 
 		$rows = $this->get_pivot()->_query( $sql );
@@ -165,10 +205,10 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 
 			// TODO: remove
 			if ( in_array( $child->get_value(), [ 'Boston' ] ) ) {
-				$child->expand();
+				$child->process();
 			}
 			if ( in_array( $child->get_value(), [ 'Diecast Collectables' ] ) ) {
-				$child->expand();
+				$child->process();
 			}
 		}
 
@@ -177,77 +217,15 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 		}
 	}
 
-	public function render() {
-
-		$html = '';
-		if ( $this->is_root() ) {
-			$html = '<table class="woobi-table">';
-		}
-		$max     = 3;
-		$colspan = $max - $this->level() + 1;
-
-		if ( $this->has_children() ) {
-			foreach ( $this->get_children() as $index => $child ) {
-				$html .= $child->render();
-			}
-			$html .= '<tr>';
-			$html .= '<td colspan="' . $colspan . '">' . $this->get_value() . ' Total</td>';
-			$html .= '</tr>';
-		} else {
-			$html .= '<tr>';
-			$html .= $this->get_td();
-			$html .= '</tr>';
-		}
-
-
-		if ( $this->is_root() ) {
-			$html .= '</table>';
-		}
-
-		return $html;
-	}
-
-	protected function get_td() {
-		$max     = 3;
-		$colspan = $max - $this->level() + 1;
-
-		$td = '';
-		if ( $this->is_first_child() && $parent = $this->get_parent() ) {
-			$td .= $parent->get_td();
-		}
-
-		$rowspan = $this->has_children() ? $this->get_descendants_count() : 1;
-		if ( ! $this->is_root() ) {
-			$td .= '<td rowspan="' . $rowspan . '" ' . ( $rowspan == 1 ? 'colspan="' . $colspan . '"' : '' ) . '>' . $this->get_value() . '</td>';
-		}
-
-		return $td;
-
-	}
-
 	/**
-	 * @param Woobi_Pivot_Query_Builder $query
+	 * Method to render current processed node
 	 *
-	 * @return Woobi_Pivot_Query_Builder
 	 * @since 1.0.0
 	 */
-	public function recursive_where( Woobi_Pivot_Query_Builder $query ) {
-		if ( $this->is_root() ) {
-			return $query;
-		}
-		$this->get_parent()->recursive_where( $query );
-		$query->where( $this->dimension->get_column(), $this->get_value() );
-
-		return $query;
-	}
-
-	/**
-	 * @return false|Woobi_Pivot_Dimension
-	 */
-	public function get_child_dimension() {
-		$level = $this->level();
-		$rows  = $this->get_pivot()->get_rows();
-
-		return isset( $rows[ $level ] ) ? $rows[ $level ] : false;
+	public function render() {
+		/**
+		 * Implement in child class
+		 */
+		//TODO: check if is processed
 	}
 }

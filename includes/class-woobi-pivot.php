@@ -52,7 +52,7 @@ class Woobi_Pivot{
 	/**
 	 * Tree with all row headers
 	 *
-	 * @var Woobi_Pivot_Header
+	 * @var Woobi_Pivot_Header_Row
 	 * @since 1.0.0
 	 */
 	protected $row_header = null;
@@ -60,7 +60,7 @@ class Woobi_Pivot{
 	/**
 	 * Tree with all row headers
 	 *
-	 * @var Woobi_Pivot_Header
+	 * @var Woobi_Pivot_Header_Column
 	 * @since 1.0.0
 	 */
 	protected $column_header = null;
@@ -143,11 +143,18 @@ class Woobi_Pivot{
 
 
 		/**
-		 * Calculate all headers
+		 * Process all row headers
 		 */
-		$this->row_header = new Woobi_Pivot_Header_Base();
+		$this->row_header = new Woobi_Pivot_Header_Row();
 		$this->row_header->set_pivot( $this );
-		$this->row_header->expand();
+		$this->row_header->process();
+
+		/**
+		 * Process all column headers
+		 */
+		$this->column_header = new Woobi_Pivot_Header_Column();
+		$this->column_header->set_pivot( $this );
+		$this->column_header->process();
 
 
 	}
@@ -157,7 +164,7 @@ class Woobi_Pivot{
 
 		?>
         <div class="woobi-pivot-container">
-<!--      wp-list-table widefat      -->
+            <!--      wp-list-table widefat      -->
             <table class="woobi-pivot woobi-table woobi-table-bordered">
                 <tbody>
                 <tr>
@@ -177,16 +184,15 @@ class Woobi_Pivot{
                     <td colspan="1">
                         Left Axis Dimensions
                     </td>
-                    <td colspan="1" class="woo-bi-top-axis-header">
-
-                        Top Axis
+                    <td colspan="1" class="woobi-top-axis-header woobi-table-container">
+	                    <?php echo $this->column_header->render(); ?>
                     </td>
                     <td colspan="1" rowspan="2" class="vertical-scroll">
                         <!--Vertical Scroll-->
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="1" class="woo-bi-left-axis-header woobi-table-container">
+                    <td colspan="1" class="woobi-left-axis-header woobi-table-container">
 						<?php echo $this->row_header->render(); ?>
                     </td>
                     <td colspan="1" class="p-0">

@@ -155,10 +155,12 @@ class Woobi_Admin{
 		require_once __DIR__ . '/../includes/class-woobi-tree-node.php';
 		require_once __DIR__ . '/../includes/class-woobi-pivot-header-base.php';
 		require_once __DIR__ . '/../includes/class-woobi-pivot-header-row.php';
+		require_once __DIR__ . '/../includes/class-woobi-pivot-header-column.php';
 
 		$pivot = new Woobi_Pivot();
 
 		$sales = new Woobi_Pivot_Measure_Sum();
+		$pivot->add_measure( $sales );
 
 		$dimension = new Woobi_Pivot_Dimension( 'city' );
 		$pivot->add_row( $dimension );
@@ -170,7 +172,19 @@ class Woobi_Admin{
 		//$dimension->set_sort('DESC');
 		$pivot->add_row( $dimension );
 
-		$pivot->add_measure( $sales );
+		//==================
+
+		$dimension = new Woobi_Pivot_Dimension( 'city' );
+		$pivot->add_column( $dimension );
+
+		$dimension = new Woobi_Pivot_Dimension( 'customerName' );
+		$pivot->add_column( $dimension );
+
+		$dimension = new Woobi_Pivot_Dimension( 'productLine' );
+		//$dimension->set_sort('DESC');
+		$pivot->add_column( $dimension );
+
+		//===================
 
 		$pivot->process();
 
