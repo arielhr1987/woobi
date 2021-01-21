@@ -7,7 +7,7 @@
  *
  * @since 1.0.0
  */
-class Woobi_Pivot_Header_Column extends Woobi_Pivot_Header_Base{
+class Woobi_Pivot_Header_Column extends Woobi_Pivot_Header{
 
 
 	/**
@@ -50,6 +50,8 @@ class Woobi_Pivot_Header_Column extends Woobi_Pivot_Header_Base{
 	protected function get_td( &$tds ) {
 		$max = 3;
 
+		//TODO: Refactor this method
+
 		if ( $this->has_children() ) {
 			if ( ! isset( $tds[ $this->level() ] ) ) {
 				$tds[ $this->level() ] = array();
@@ -64,7 +66,7 @@ class Woobi_Pivot_Header_Column extends Woobi_Pivot_Header_Base{
 		$measures_count = $measures_count ? $measures_count : 1;
 		$colspan        = $measures_count;
 
-		$rowspan = $max - $this->level() + 1 ;
+		$rowspan = $max - $this->level() + 1;
 
 		if ( ! $this->is_root() ) {
 			$td = '<td colspan="' . $colspan . '" rowspan="' . $rowspan . '">' . $this->get_value() . '</td>';

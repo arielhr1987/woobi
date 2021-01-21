@@ -156,8 +156,97 @@ class Woobi_Pivot{
 		$this->column_header->set_pivot( $this );
 		$this->column_header->process();
 
+		/**
+		 * Calculate all values for each column/row combination
+		 * Only if we have measures we can calculate totals and values
+		 */
+		if ( count( $this->get_measures() ) ) {
+
+			/**
+			 * Calculate all column totals
+			 */
+			$column_levels = $this->column_header->get_expanded_nodes_by_level();
+			foreach ( $column_levels as $column_level => $column_nodes ) {
+				$this->calculate_totals( $column_nodes );
+			}
+
+			/**
+			 * Calculate all row totals
+			 */
+			$row_levels = $this->row_header->get_expanded_nodes_by_level();
+			foreach ( $row_levels as $row_level => $row_nodes ) {
+				$this->calculate_totals( $row_nodes );
+			}
+
+			/**
+			 * Calculate all
+			 */
+			foreach ( $column_levels as $column_level => $column_nodes ) {
+
+				foreach ( $row_levels as $row_level => $row_nodes ) {
+
+					$query = new Woobi_Pivot_Query_Builder();
+
+					foreach ( $column_nodes as $column_node ) {
+						$query = $column_node->select( $query );
+						$query = $column_node->group_by( $query );
+					}
+
+					foreach ( $row_nodes as $row_node ) {
+						$query = $row_node->select( $query );
+						$query = $row_node->group_by( $query );
+
+						if ( ! $row_node->is_root() ) {
+							$query->or_group_start();
+							$query = $column_node->where( $query );
+							$query = $row_node->where( $query );
+							$query->group_end();
+						}
+					}
+
+					foreach ( $this->get_measures() as $measure ) {
+						$query->select( $measure->get_total_expression() );
+					}
+
+					$sql = $query->get_compiled_select( 'customer_product_dollarsales' );
+
+					echo '<code>' . $sql . '</code><br><br>';
+				}
+			}
+		}
+
+
+		$t = 0;
+
 
 	}
+
+	protected function calculate_totals( $nodes ) {
+		$query = new Woobi_Pivot_Query_Builder();
+
+		foreach ( $nodes as $index => $node ) {
+
+			$query = $node->select( $query );
+			$query = $node->group_by( $query );
+
+
+			if ( ! $node->is_root() ) {
+
+				$query->or_group_start();
+				$query = $node->where( $query );
+				$query->group_end();
+			}
+		}
+
+		foreach ( $this->get_measures() as $measure ) {
+			$query->select( $measure->get_total_expression() );
+		}
+
+		$sql = $query->get_compiled_select( 'customer_product_dollarsales' );
+
+		echo '<code>' . $sql . '</code><br><br>';
+	}
+
 
 	public function render() {
 		//return $this->row_header->render();
@@ -185,7 +274,7 @@ class Woobi_Pivot{
                         Left Axis Dimensions
                     </td>
                     <td colspan="1" class="woobi-top-axis-header woobi-table-container">
-	                    <?php echo $this->column_header->render(); ?>
+						<?php echo $this->column_header->render(); ?>
                     </td>
                     <td colspan="1" rowspan="2" class="vertical-scroll">
                         <!--Vertical Scroll-->

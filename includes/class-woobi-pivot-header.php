@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Class Woobi_Pivot_Header_Base
+ * Class Woobi_Pivot_Header
  *
  * Base class that represents a dimension header
  *
  * @since 1.0.0
  */
-class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
+class Woobi_Pivot_Header extends Woobi_Tree_Node{
 
 	/**
 	 * The pivot this header belongs to
@@ -26,7 +26,7 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 	protected $dimension = null;
 
 	/**
-	 * Woobi_Pivot_Header_Base constructor.
+	 * Woobi_Pivot_Header constructor.
 	 *
 	 * @param string $value
 	 *
@@ -102,7 +102,7 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 
 	/**
 	 * Returns the id of this header
-	 * An id is unique in the among siblings as we use a SELECT DISTINCT
+	 * An id is unique among siblings as we use a SELECT DISTINCT
 	 * i.e. fn89a7nd8an08d78f7ad
 	 *
 	 * @return string
@@ -132,6 +132,25 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 	}
 
 	/**
+	 * Recursive method to traverse node hierarchy and generate sql SELECT clause.
+	 * i.e. `country` AS 'country', 'city` AS 'city'
+	 *
+	 * @param Woobi_Pivot_Query_Builder $query
+	 *
+	 * @return Woobi_Pivot_Query_Builder
+	 * @since 1.0.0
+	 */
+	public function select( $query ) {
+		if ( $this->has_parent() ) {
+			$this->get_parent()->select( $query );
+		}
+		$dimension = $this->child_dimension();
+		$query->select( $dimension->get_column() );
+
+		return $query;
+	}
+
+	/**
 	 * Recursive method to traverse node hierarchy and generate sql WHERE clause
 	 * i.e. (`country` = 'USA' AND 'city` = 'Boston')
 	 * where country and city are dimensions
@@ -141,12 +160,28 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 	 * @return Woobi_Pivot_Query_Builder
 	 * @since 1.0.0
 	 */
-	protected function where( $query ) {
+	public function where( $query ) {
 		if ( $this->is_root() ) {
 			return $query;
 		}
 		$this->get_parent()->where( $query );
-		$query->where( $this->dimension->get_column(), $this->get_value() );
+		$query->where( $this->get_dimension()->get_column(), $this->get_value() );
+
+		return $query;
+	}
+
+	/**
+	 * @param Woobi_Pivot_Query_Builder $query
+	 *
+	 * @return Woobi_Pivot_Query_Builder
+	 */
+	public function group_by( $query ) {
+		if ( $this->has_parent() ) {
+			$this->get_parent()->group_by( $query );
+		}
+
+		$dimension = $this->child_dimension();
+		$query->group_by( $dimension->get_column() . ' ' . $dimension->get_sort() , false);
 
 		return $query;
 	}
@@ -186,6 +221,9 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 			return;
 		}
 
+		/**
+		 * Calculate all DISTINCT values
+		 */
 		$query = new Woobi_Pivot_Query_Builder();
 		$query->distinct();
 		$query->select( $child_dimension->get_column() ); //TODO: include alias
@@ -202,12 +240,11 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 			 */
 			$child = $this->add_child( $row[ $child_dimension->get_column() ] );
 
-
-			// TODO: remove
-			if ( in_array( $child->get_value(), [ 'Boston' ] ) ) {
+			// TODO: Check if node is expanded
+			if ( in_array( $child->get_value(), [ 'USA', 'Boston' , 'NYC'] ) ) {
 				$child->process();
 			}
-			if ( in_array( $child->get_value(), [ 'Diecast Collectables' ] ) ) {
+			if ( in_array( $child->get_value(), [ 'Trains' ] ) ) {
 				$child->process();
 			}
 		}
@@ -226,6 +263,35 @@ class Woobi_Pivot_Header_Base extends Woobi_Tree_Node{
 		/**
 		 * Implement in child class
 		 */
-		//TODO: check if is processed
+		//TODO: check if is processed. Should I throw an Exception?
+	}
+
+	/**
+	 * @param array $nodes
+	 *
+	 * @return static[][]
+	 */
+	public function get_expanded_nodes_by_level( &$nodes = null ) {
+		if ( $nodes === null ) {
+			$nodes = array();
+		}
+
+		if ( $this->has_children() ) {
+			//is expanded
+
+			$level = $this->level();
+			if ( ! isset( $nodes[ $level ] ) || ! is_array( $nodes[ $level ] ) ) {
+				$nodes[ $level ] = array();
+			}
+
+			$nodes[ $level ][] = $this;
+
+			foreach ( $this->get_children() as $child ) {
+				$child->get_expanded_nodes_by_level( $nodes );
+			}
+		}
+
+		return $nodes;
+
 	}
 }

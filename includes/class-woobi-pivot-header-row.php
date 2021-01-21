@@ -7,7 +7,7 @@
  *
  * @since 1.0.0
  */
-class Woobi_Pivot_Header_Row extends Woobi_Pivot_Header_Base{
+class Woobi_Pivot_Header_Row extends Woobi_Pivot_Header{
 
 	/**
 	 * Method to render left axis header table
@@ -29,7 +29,7 @@ class Woobi_Pivot_Header_Row extends Woobi_Pivot_Header_Base{
 				$html .= $child->render();
 			}
 			/**
-			 * If we render the children them we most show totals
+			 * If we render the children, we most show totals
 			 */
 			$html .= '<tr>';
 			$html .= '<td colspan="' . $colspan . '">' . $this->get_value() . ' Total</td>';

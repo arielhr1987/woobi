@@ -69,7 +69,7 @@ class Woobi_Pivot_Measure{
 	}
 
 	public function get_total_expression() {
-		return sprintf( '%(%s) AS %s', $this->aggregator, $this->field, $this->name );
+		return sprintf( '%s(%s)', $this->aggregator, $this->field );
 	}
 
 	public function format( $value ) {
