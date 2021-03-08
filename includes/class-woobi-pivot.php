@@ -161,6 +161,10 @@ class Woobi_Pivot{
 		 * Only if we have measures we can calculate totals and values
 		 */
 		if ( count( $this->get_measures() ) ) {
+			/**
+			 * Calculate grand total
+			 */
+			//TODO: calculate grand total
 
 			/**
 			 * Calculate all column totals
